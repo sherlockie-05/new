@@ -107,7 +107,7 @@ services:
     cpus: 2
     mem_limit: "2G"
     environment:
-      - POSTGRES_PASSWORD=mypass
+      - POSTGRES_PASSWORD=Go@Tw!Fs#
     ports:
       - "5432:5432"
     volumes:
