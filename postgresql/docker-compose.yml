@@ -5,8 +5,8 @@ services:
   broadsea-methods-library:
     image: ohdsi/broadsea-methodslibrary
     ports:
-      - "8787:8787"
-      - "6311:6311"
+      - "8789:8789"
+      - "6315:6315"
     environment:
       - PASSWORD=Go@Tw!Fs#
 
