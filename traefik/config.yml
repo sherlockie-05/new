@@ -82,12 +82,12 @@ http:
     broadsea-hades:
       loadBalancer:
         servers:
-          - url: http://broadsea-hades:8787
+          - url: http://broadsea-hades:8789
 
     broadsea-solr-vocab:
       loadBalancer:
         servers:
-          - url: http://broadsea-solr-vocab:8983
+          - url: http://broadsea-solr-vocab:8988
 
     broadsea-ares:
       loadBalancer:
