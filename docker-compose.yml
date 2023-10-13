@@ -61,8 +61,8 @@ services:
     labels:
       - "traefik.enable=true"
     ports:
-      - "8787:8787"
-      - "6311:6311"
+      - "8789:8789"
+      - "6315:6315"
 
   # WebAPI and Atlas services based on the standard Docker Hub images -------------
   ohdsi-webapi-from-image:
@@ -135,7 +135,7 @@ services:
       - ./${VOCAB_JDBC_FILE_NAME}:/opt/solr-8.11.1/server/lib/${VOCAB_JDBC_FILE_NAME}:ro
       - ./solr:/tmp/solr_config:ro
     ports:
-      - "8983:8983"
+      - "8988:8988"
     labels:
       - "traefik.enable=true"
     command:
