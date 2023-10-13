@@ -1,12 +1,9 @@
-version: '3.9'
+version: '3'
 
 volumes:
   atlasdb-postgres-data:
-    name: atlasdb-postgres-data
   rstudio-home-data:
-    name: rstudio-home-data
   rstudio-tmp-data:
-    name: rstudio-tmp-data
 
 services:
   
@@ -30,7 +27,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   broadsea-content:
-    profiles: [ "default", "content" ]
     container_name: broadsea-content
     image: nginx
     restart: unless-stopped
@@ -48,10 +44,8 @@ services:
       - "traefik.enable=true"
 
   broadsea-hades:
-    profiles: [ "default", "hades" ]
     container_name: broadsea-hades
     image: ohdsi/broadsea-hades:4.2.1
-    platform: "linux/amd64"
     environment:
       - USER=${HADES_USER}
       - PASSWORD=${HADES_PASSWORD}
@@ -66,46 +60,25 @@ services:
 
   # WebAPI and Atlas services based on the standard Docker Hub images -------------
   ohdsi-webapi-from-image:
-    profiles: [ "default", "webapi-from-image" ]
     image: docker.io/ohdsi/webapi:latest
-    extends: 
-      file: "ohdsi-webapi.yml"
-      service: ohdsi-webapi
 
   ohdsi-atlas-from-image:
-    profiles: [ "default", "atlas-from-image" ]
     image: docker.io/ohdsi/atlas:latest
-    extends: 
-      file: "ohdsi-atlas.yml"
-      service: ohdsi-atlas
 
   # WebAPI and Atlas services based on git repo (for developers) -------------
   ohdsi-webapi-from-git:
-    profiles: [ "webapi-from-git" ]
     build: 
-      context: ${WEBAPI_GITHUB_URL}
+      context: https:/github.com/OHDSI/WebAPI.git#rc-2.13.0
       args:
         MAVEN_PARAMS: "-DskipTests=true -DskipUnitTests=true"
-    extends: 
-      file: "ohdsi-webapi.yml"
-      service: ohdsi-webapi
 
   ohdsi-atlas-from-git:
-    profiles: [ "atlas-from-git" ]
     build: ${ATLAS_GITHUB_URL}
-    extends: 
-      file: "ohdsi-atlas.yml"
-      service: ohdsi-atlas
-
   # -----------------------------------------------------------------
 
   broadsea-atlasdb:
-    profiles: [ "default", "atlasdb" ]
     image: ohdsi/broadsea-atlasdb:2.0.0
     container_name: broadsea-atlasdb
-    platform: "linux/amd64"
-    cpus: 2
-    mem_limit: "2G"
     environment:
       - POSTGRES_PASSWORD=Go@Tw!Fs#
     ports:
@@ -120,7 +93,6 @@ services:
       retries: 10
 
   broadsea-solr-vocab:
-    profiles: [ "solr-vocab-no-import", "solr-vocab-with-import" ]
     container_name: solr-vocab
     restart: unless-stopped
     image: solr:8.11.1
@@ -149,17 +121,14 @@ services:
       retries: 5
 
   broadsea-solr-vocab-run-import:
-    profiles: [ "solr-vocab-with-import" ]
     container_name: solr-vocab-run-import
     image: curlimages/curl
     depends_on:
-      broadsea-solr-vocab:
-        condition: service_healthy
+      - broadsea-solr-vocab
     command: curl -d "vocab_database_schema=${VOCAB_DATABASE_SCHEMA}" \ 
              -X POST ${SOLR_VOCAB_ENDPOINT}/${VOCAB_VERSION}/dataimport?command=full-import&entity=concept
 
   broadsea-ares:
-    profiles: [ "ares" ]
     container_name: broadsea-ares
     restart: unless-stopped
     build:
@@ -171,11 +140,7 @@ services:
 
 
   broadsea-omop-vocab-load:
-    profiles: [ "omop-vocab-pg-load" ]
     container_name: omop-vocab-load
-    extends:
-      file: "postgres-load.yml"
-      service: broadsea-postgres-load
     environment:
       VOCAB_PG_HOST: ${VOCAB_PG_HOST}
       VOCAB_PG_DATABASE: ${VOCAB_PG_DATABASE}
@@ -189,11 +154,7 @@ services:
 
 
   broadsea-phoebe-load:
-    profiles: [ "phoebe-pg-load" ]
     container_name: broadsea-phoebe-load
-    extends:
-      file: "postgres-load.yml"
-      service: broadsea-postgres-load
     environment:
       PHOEBE_PG_HOST: ${PHOEBE_PG_HOST}
       PHOEBE_PG_DATABASE: ${PHOEBE_PG_DATABASE}
@@ -203,4 +164,3 @@ services:
     volumes:
       - ./phoebe:/tmp
     entrypoint: ["sh", "/tmp/load_phoebe.sh" ]
-    
